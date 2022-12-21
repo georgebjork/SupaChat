@@ -52,13 +52,14 @@ class _RoomsPageState extends State<RoomsPage> {
     haveCalledGetRooms = true;
 
     //Create a subscrition to grab realtime updates on rooms the user is in.
-    final List<dynamic> participantMaps = await supabase.from('room_participants').select().eq('profile_id', userId);
     // rawRoomsSubscription = supabase.from('room_participants').stream(primaryKey: ['room_id', 'profile_id'],).listen((participantMaps) async {
     //   if (participantMaps.isEmpty) {
     //     return;
     //   }
     // });
     //rooms = participantMaps.map(Room.fromRoomParticipants).where((room) => room.otherUserId != userId).toList();
+
+    final List<dynamic> participantMaps = await supabase.from('room_participants').select().eq('profile_id', userId);
     rooms = participantMaps.map((index) => Room.fromRoomParticipants(index)).toList();
   } 
 
