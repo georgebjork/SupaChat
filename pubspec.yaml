@@ -39,6 +39,7 @@ dependencies:
   supabase_flutter: ^1.2.0
   timeago: ^3.3.0
   hexcolor: ^3.0.1
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_test:

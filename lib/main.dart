@@ -1,9 +1,12 @@
+import 'package:chat_app/models/room.dart';
+import 'package:chat_app/models/room_page_provider.dart';
 import 'package:chat_app/screens/login_page.dart';
 import 'package:chat_app/screens/register_page.dart';
 import 'package:chat_app/screens/chat_page.dart';
 import 'package:chat_app/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app/screens/splash_screen_page.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -24,10 +27,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: appThemeDark,
-      home: const SplashScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => RoomPageProvider())
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: appThemeDark,
+        home: const SplashScreen(),
+      ),
     );
   }
 }
