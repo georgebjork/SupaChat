@@ -177,8 +177,45 @@ class _DisplayChatsState extends State<DisplayChats> {
       // Rooms now has updated data
       rooms = listOfRooms.map((e) => Room.fromRoomParticipants(e)).toList();
 
+      for (final room in rooms) {
+        getNewestMessage(roomId: room.id);
+      }
+
       return Room.fromRoomParticipants(room); 
     }).toList()); 
+
+
+
+  }
+
+  void getNewestMessage({required roomId}) {
+    messagesStream['roomId'] = supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .eq('room_id', roomId)
+        .order('created_at')
+        .limit(1)
+        .map<Message?>(
+          (data) => data.isEmpty
+              ? null
+              : Message.fromMap(
+                  map: data.first,
+                  myUserId: userId,
+                ),
+        )
+        .listen((message) {
+          final index = rooms.indexWhere((room) => room.id == roomId);
+          rooms[index] = rooms[index].copyWith(lastMessage: message);
+
+          rooms.sort((a, b) {
+            // Sort according to the last message
+            // Use the room createdAt when last message is not available
+            final aTimeStamp = a.lastMessage != null ? a.lastMessage!.createdAt : a.createdAt;
+            final bTimeStamp = b.lastMessage != null ? b.lastMessage!.createdAt : b.createdAt;
+            return bTimeStamp.compareTo(aTimeStamp);
+          });
+          setState(() {});
+        });
   }
 
   Profile getProfileName(String id, List<Profile> profiles){
@@ -222,7 +259,7 @@ class _DisplayChatsState extends State<DisplayChats> {
                     onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
                     leading: Avatar(profile: otherUser),
                     title: Text(otherUser.username),
-                    subtitle: const Text('This will be the most recent message'),
+                    subtitle: Text(rooms[index].lastMessage == null ? 'Click here to send a message!' : rooms[index].lastMessage!.content),
                   )
                 ),
               );
