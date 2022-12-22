@@ -204,6 +204,7 @@ class _DisplayChatsState extends State<DisplayChats> {
                 ),
         )
         .listen((message) {
+          // Set the newest message 
           final index = rooms.indexWhere((room) => room.id == roomId);
           rooms[index] = rooms[index].copyWith(lastMessage: message);
 
