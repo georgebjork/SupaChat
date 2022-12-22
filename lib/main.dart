@@ -1,5 +1,6 @@
+import 'package:chat_app/models/providers/theme_provider.dart';
 import 'package:chat_app/models/room.dart';
-import 'package:chat_app/models/room_page_provider.dart';
+import 'package:chat_app/models/providers/room_page_provider.dart';
 import 'package:chat_app/screens/login_page.dart';
 import 'package:chat_app/screens/register_page.dart';
 import 'package:chat_app/screens/chat_page.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:chat_app/screens/splash_screen_page.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,14 +31,24 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => RoomPageProvider())
+        ChangeNotifierProvider(create: (context) => RoomPageProvider()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider(key: 'dark'))
       ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: appThemeDark,
-        home: const SplashScreen(),
-      ),
+      child: MyAppWithTheme()
     );
   }
+}
+
+class MyAppWithTheme extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    final theme = ThemeProvider(key: 'dark').getTheme();
+    return MaterialApp(
+        title: 'Flutter Demo',
+        theme: theme,
+        home: const SplashScreen(),
+    );
+  }
+
 }
 

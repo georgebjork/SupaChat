@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:chat_app/components/avatar.dart';
 import 'package:chat_app/models/Message.dart';
-import 'package:chat_app/models/room_page_provider.dart';
+import 'package:chat_app/models/providers/room_page_provider.dart';
 import 'package:chat_app/models/profile.dart';
 import 'package:chat_app/models/room.dart';
 import 'package:chat_app/screens/chat_page.dart';
