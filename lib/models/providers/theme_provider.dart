@@ -88,8 +88,10 @@ class ThemeProvider extends ChangeNotifier{
 
   //Dark theme because we love that!
   static final appThemeDark = ThemeData.dark().copyWith(
+    iconTheme: const IconThemeData(color: Colors.white),
     primaryColorDark: HexColor('#00b530'),
     appBarTheme: AppBarTheme(
+      actionsIconTheme: const IconThemeData(color: Colors.white),
       elevation: 1,
       backgroundColor: HexColor('#353333'),
       iconTheme: const IconThemeData(color: Colors.black),

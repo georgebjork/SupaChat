@@ -55,8 +55,9 @@ class _RoomsPageState extends State<RoomsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: HomeDrawer(),
+      drawer: const HomeDrawer(),
       appBar: AppBar(
+        iconTheme: Theme.of(context).iconTheme,
         title: const Text('Chat Rooms'), 
         actions: [
           TextButton(
@@ -291,14 +292,15 @@ class _HomeDrawerState extends State<HomeDrawer> {
   Widget build(BuildContext context) {
     final themeData = Provider.of<ThemeProvider>(context, listen: false);
     return Drawer(
+      
       child: Column(
         children: [
           DrawerHeader(decoration: BoxDecoration(color: themeData.green), child: null),
           Expanded(
             child: ListView(
               shrinkWrap: true,
-              children: const [
-                ListTile(title: Text('something'),)
+              children: [
+                ListTile(leading: const Icon(Icons.account_circle_outlined), title: const Text('Edit Account'), onTap: () => context.showSnackBar(message: 'Not yet implmented!'))
               ],
             ),
           ),
@@ -307,9 +309,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
             child: Column(
               children: [
                 const Divider(),
-                const ListTile(leading: Icon(Icons.settings), title: Text('Settings')),
+                ListTile(leading: const Icon(Icons.settings), title: const Text('Settings'), onTap: () => context.showSnackBar(message: 'Not yet implmented!')),
                 SwitchListTile(
-                  title: Text('Light or Dark Mode'),
+                  title: const Text('Light or Dark Mode'),
                   secondary: themeData.isDark ? const Icon(Icons.brightness_2_outlined) : const Icon(Icons.brightness_low_sharp),
                   value: themeData.isDark, 
                   activeColor: themeData.green, 
