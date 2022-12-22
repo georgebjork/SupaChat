@@ -3,6 +3,7 @@ import 'package:chat_app/components/avatar.dart';
 import 'package:chat_app/models/Message.dart';
 import 'package:chat_app/models/providers/room_page_provider.dart';
 import 'package:chat_app/models/profile.dart';
+import 'package:chat_app/models/providers/theme_provider.dart';
 import 'package:chat_app/models/room.dart';
 import 'package:chat_app/screens/chat_page.dart';
 import 'package:chat_app/screens/register_page.dart';
@@ -54,6 +55,7 @@ class _RoomsPageState extends State<RoomsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: HomeDrawer(),
       appBar: AppBar(
         title: const Text('Chat Rooms'), 
         actions: [
@@ -276,14 +278,57 @@ class _DisplayChatsState extends State<DisplayChats> {
 }
 
 
-/*
+class HomeDrawer extends StatefulWidget {
+  
+  const HomeDrawer({super.key});
 
- // Create a subscription to get realtime updates on room creation
-    roomsStream = supabase
-    .from('room_participants')
-    .stream(primaryKey: ['room_id', 'profile_id'])
-    .neq('profile_id', userId)
-    .map((event) => event.map((e) => Room.fromRoomParticipants(e)).toList());
+  @override
+  State<HomeDrawer> createState() => _HomeDrawerState();
+}
 
-
-*/
+class _HomeDrawerState extends State<HomeDrawer> {
+  @override
+  Widget build(BuildContext context) {
+    final themeData = Provider.of<ThemeProvider>(context, listen: false);
+    return Drawer(
+      child: Column(
+        children: [
+          DrawerHeader(decoration: BoxDecoration(color: themeData.green), child: null),
+          Expanded(
+            child: ListView(
+              shrinkWrap: true,
+              children: const [
+                ListTile(title: Text('something'),)
+              ],
+            ),
+          ),
+          Align(
+            alignment: FractionalOffset.bottomCenter,
+            child: Column(
+              children: [
+                const Divider(),
+                const ListTile(leading: Icon(Icons.settings), title: Text('Settings')),
+                SwitchListTile(
+                  title: Text('Light or Dark Mode'),
+                  secondary: themeData.isDark ? const Icon(Icons.brightness_2_outlined) : const Icon(Icons.brightness_low_sharp),
+                  value: themeData.isDark, 
+                  activeColor: themeData.green, 
+                  onChanged: (toggled) { 
+                    setState(() {
+                      if(themeData.isDark == true){
+                        themeData.setTheme('light');
+                      }
+                      else {
+                        themeData.setTheme('dark');
+                      }
+                    });
+                  },
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}

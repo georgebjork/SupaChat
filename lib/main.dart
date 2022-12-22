@@ -43,11 +43,17 @@ class MyAppWithTheme extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     final theme = ThemeProvider(key: 'dark').getTheme();
-    return MaterialApp(
-        title: 'Flutter Demo',
-        theme: theme,
-        home: const SplashScreen(),
-    );
+    return Consumer<ThemeProvider>(
+      builder: (context, data, _) {
+        return  MaterialApp(
+          title: 'Flutter Demo',
+          theme: data.getTheme(),
+          home: const SplashScreen(),
+        );
+      }
+    ); 
+    
+   
   }
 
 }

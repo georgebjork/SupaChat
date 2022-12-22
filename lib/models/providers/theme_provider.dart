@@ -7,6 +7,13 @@ class ThemeProvider extends ChangeNotifier{
 
   late ThemeData _themeData;
   late String key; 
+  // True stands for dark and false stands for light
+  late bool isDark;
+
+  final _green = HexColor('#00b530');
+  final _black = HexColor('#353333');
+  final _grey = HexColor('#a6a6a6');
+  
 
   ThemeProvider({required String key}){
     setTheme(key);
@@ -15,8 +22,10 @@ class ThemeProvider extends ChangeNotifier{
 
   void setTheme(String theme){
     if(theme == "dark") {
+      isDark = true;
       _themeData = appThemeDark;
     } else {
+      isDark = false;
       _themeData = appThemeLight;
     }
     notifyListeners();
@@ -25,6 +34,10 @@ class ThemeProvider extends ChangeNotifier{
   ThemeData getTheme(){
     return _themeData;
   }
+
+  HexColor get green => _green;
+  HexColor get black => _black;
+  HexColor get grey => _grey;
 
 
   // Light theme, but not as loved.
