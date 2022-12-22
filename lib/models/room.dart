@@ -47,4 +47,9 @@ class Room {
       lastMessage: lastMessage ?? this.lastMessage,
     );
   }
+
+  @override
+  String toString() {
+    return 'Room: {id: ${id}, createdAt: ${createdAt}, otherUserId: ${otherUserId}}';
+  }
 }

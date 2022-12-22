@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chat_app/components/avatar.dart';
+import 'package:chat_app/models/Message.dart';
 import 'package:chat_app/models/room_page_provider.dart';
 import 'package:chat_app/models/profile.dart';
 import 'package:chat_app/models/room.dart';
@@ -22,22 +23,14 @@ class RoomsPage extends StatefulWidget {
 
 class _RoomsPageState extends State<RoomsPage> {
 
-  // FOR LATER USE
-  // final Map<String, StreamSubscription<Message?>> messageSubscriptions = {};
-  // StreamSubscription<List<Map<String, dynamic>>>? rawRoomsSubscription;
-
   //List of available profiles to message
-  List<Profile> profiles = [];
+  List<Profile> currentProfileData = [];
 
   // List of rooms you are a part of
-  List<Room> rooms = [];
+  List<Room> currentRoomData = [];
 
   // The Current User Id
   final String userId = supabase.auth.currentUser!.id;
-
-  // Have we called this initRooms already? If so then we dont have to call again.
-  bool haveCalledGetRooms = false;
-
 
   @override
   void initState() {
@@ -48,20 +41,14 @@ class _RoomsPageState extends State<RoomsPage> {
   Future<void> loadProfiles () async {
     // Grab all profiles 
     final List<dynamic> data = await supabase.from('profiles').select();
-    profiles = data.map((index) => Profile.fromMap(index)).toList();
+    currentProfileData = data.map((index) => Profile.fromMap(index)).toList();
   }
 
-  // This will load all rooms and set up a stream to listen to updates
+  // This will load all of the rooms for user from the database
   Future<void> loadRooms() async {
-    // Check to see if we need to call again 
-    if (haveCalledGetRooms) {
-      return;
-    }
-    haveCalledGetRooms = true;
-
     // Grab all of the rooms we are a part of, but filter out ourselves. Row Line Security will only allow us to query rooms we are in.
     final List<dynamic> currentRooms = await supabase.from('room_participants').select().neq('profile_id', userId);
-    rooms = currentRooms.map((index) => Room.fromRoomParticipants(index)).toList();
+    currentRoomData = currentRooms.map((index) => Room.fromRoomParticipants(index)).toList();
   } 
 
   @override
@@ -96,8 +83,8 @@ class _RoomsPageState extends State<RoomsPage> {
           } 
 
           // Set the provider data
-          Provider.of<RoomPageProvider>(context, listen: false).profiles = profiles;
-          Provider.of<RoomPageProvider>(context, listen: false).rooms = rooms;
+          Provider.of<RoomPageProvider>(context, listen: false).profiles = currentProfileData;
+          Provider.of<RoomPageProvider>(context, listen: false).rooms = currentRoomData;
 
           return Column(
             children: const [
@@ -165,21 +152,38 @@ class DisplayChats extends StatefulWidget {
 
 class _DisplayChatsState extends State<DisplayChats> {
 
-  late final Stream<List<Room>> roomsStream;
+  // Data I need:
+
+  // A stream of all room data. This will notify us of the addition of rooms.  StreamSubscription<List<Map<String, dynamic>>>? roomsStream;
+  // A list of all rooms not attached to the stream subscription. This will allow us to change data. List<Room> rooms
+  // A stream of all chat messages data. This will notify us about new chats to display on the room cards. final Map<String, StreamSubscription<Message?>> messagesStream = {};
+
+  int timesRendered = 0;
+  // Room data
+  late Stream<List<Room>> roomsStream;
+  List<Room> rooms = [];
+
+  //Message data
+  final Map<String, StreamSubscription<Message?>> messagesStream = {};
+
+  // User id
   final String userId = supabase.auth.currentUser!.id;
+
+  void setRoomsListener() {
+   
+    roomsStream = supabase.from('room_participants').stream(primaryKey: ['room_id', 'profile_id']).neq('profile_id', userId)
+    .map((listOfRooms) => listOfRooms.map((room) { 
+
+      // Rooms now has updated data
+      rooms = listOfRooms.map((e) => Room.fromRoomParticipants(e)).toList();
+
+      return Room.fromRoomParticipants(room); 
+    }).toList()); 
+  }
 
   Profile getProfileName(String id, List<Profile> profiles){
     int index = profiles.indexWhere((element) => element.id == id);
     return profiles[index];
-  }
-
-  void setRoomsListener() {
-    // Create a subscription to get realtime updates on room creation
-    roomsStream = supabase
-    .from('room_participants')
-    .stream(primaryKey: ['room_id', 'profile_id'])
-    .neq('profile_id', userId)
-    .map((event) => event.map((e) => Room.fromRoomParticipants(e)).toList());
   }
 
   @override
@@ -192,10 +196,11 @@ class _DisplayChatsState extends State<DisplayChats> {
   @override
   Widget build(BuildContext context) {
 
-    List<Profile>? profiles = Provider.of<RoomPageProvider>(context, listen: false).profiles;
-    List<Room>? roomsOriginal = Provider.of<RoomPageProvider>(context, listen: false).rooms;
+    List<Profile>? currentProfileData = Provider.of<RoomPageProvider>(context, listen: false).profiles;
+    List<Room>? currentRoomsData = Provider.of<RoomPageProvider>(context, listen: false).rooms;
 
-    if(roomsOriginal!.isEmpty){
+    // If this data is empty, then theres no need to render the stream. Return this.
+    if(currentRoomsData!.isEmpty){
       return const Center(child: Center(child: Text('Click on an Avatar above and send them a message :) ')));
     }
 
@@ -203,12 +208,12 @@ class _DisplayChatsState extends State<DisplayChats> {
       stream: roomsStream,
       builder: (context, snapshot) {
         if(snapshot.hasData) {
-          final rooms = snapshot.data!;
+          //final rooms = snapshot.data!;
           return ListView.builder(
             scrollDirection: Axis.vertical,
             itemCount: rooms.length,
             itemBuilder: (BuildContext context, int index) {  
-              Profile? otherUser = getProfileName(rooms[index].otherUserId, profiles!);
+              Profile? otherUser = getProfileName(rooms[index].otherUserId, currentProfileData!);
               return Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(10,10,10,0),
@@ -225,27 +230,22 @@ class _DisplayChatsState extends State<DisplayChats> {
           );
         }
         else {
-          return ListView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: roomsOriginal.length,
-            itemBuilder: (BuildContext context, int index) {  
-              Profile? otherUser = getProfileName(roomsOriginal[index].otherUserId, profiles!);
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(10,10,10,0),
-                child: Card(
-                  child: ListTile(
-                    onTap: () => Navigator.of(context).push(ChatPage.route(roomsOriginal[index].id)),
-                    leading: Avatar(profile: otherUser),
-                    title: Text(otherUser.username),
-                    subtitle: const Text('This will be the most recent message'),
-                  )
-                ),
-              );
-            }
-          );
+          return preloader;
         }
       }
     );
   }
 }
+
+
+/*
+
+ // Create a subscription to get realtime updates on room creation
+    roomsStream = supabase
+    .from('room_participants')
+    .stream(primaryKey: ['room_id', 'profile_id'])
+    .neq('profile_id', userId)
+    .map((event) => event.map((e) => Room.fromRoomParticipants(e)).toList());
+
+
+*/
