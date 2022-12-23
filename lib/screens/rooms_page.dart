@@ -172,6 +172,7 @@ class _DisplayChatsState extends State<DisplayChats> {
   // A list of all rooms not attached to the stream subscription. This will allow us to change data. List<Room> rooms
   // A stream of all chat messages data. This will notify us about new chats to display on the room cards. final Map<String, StreamSubscription<Message?>> messagesStream = {};
 
+  int renderCount = 0;
   // Room data
   StreamSubscription<List<Map<String, dynamic>>>? roomsStream;
   List<Room> rooms = [];
@@ -182,15 +183,27 @@ class _DisplayChatsState extends State<DisplayChats> {
   // User id
   final String userId = supabase.auth.currentUser!.id;
 
-  void setRoomsListener() {
+  List<Room> sortRooms(List<Room> r){
+    // This should be moved into its own function. It should be used when rooms are also created. It should also sort and then render
+    r.sort((a, b) {
+      // Sort according to the last message
+      // Use the room createdAt when last message is not available
+      final aTimeStamp = a.lastMessage != null ? a.lastMessage!.createdAt : a.createdAt;
+      final bTimeStamp = b.lastMessage != null ? b.lastMessage!.createdAt : b.createdAt;
+      return bTimeStamp.compareTo(aTimeStamp);
+    });
+
+    return r;
+  }
+
+  Future<void> setRoomsListener() async {
 
     roomsStream = supabase.from('room_participants').stream(primaryKey: ['room_id', 'profile_id']).neq('profile_id', userId).listen((listOfRooms) async {
       
       rooms = listOfRooms.map((e) => Room.fromRoomParticipants(e)).toList();
       for (final room in rooms) {
         getNewestMessage(roomId: room.id);
-       }
-      setState(() {});
+      }
     }); 
   }
 
@@ -214,14 +227,8 @@ class _DisplayChatsState extends State<DisplayChats> {
           final index = rooms.indexWhere((room) => room.id == roomId);
           rooms[index] = rooms[index].copyWith(lastMessage: message);
 
-          // This should be moved into its own function. It should be used when rooms are also created. It should also sort and then render
-          rooms.sort((a, b) {
-            // Sort according to the last message
-            // Use the room createdAt when last message is not available
-            final aTimeStamp = a.lastMessage != null ? a.lastMessage!.createdAt : a.createdAt;
-            final bTimeStamp = b.lastMessage != null ? b.lastMessage!.createdAt : b.createdAt;
-            return bTimeStamp.compareTo(aTimeStamp);
-          });
+          rooms = sortRooms(rooms);
+          setState(() {});
         });
   }
 
@@ -232,8 +239,19 @@ class _DisplayChatsState extends State<DisplayChats> {
 
   @override
   void initState() {
+    // Get init data
+    rooms = Provider.of<RoomPageProvider>(context, listen: false).rooms!;
+
+    // Set the listener
     setRoomsListener();
+
     super.initState();
+  }
+
+  @override
+  void dispose(){
+    roomsStream?.cancel();
+    super.dispose();
   }
 
 
@@ -241,8 +259,9 @@ class _DisplayChatsState extends State<DisplayChats> {
   Widget build(BuildContext context) {
 
     List<Profile>? currentProfileData = Provider.of<RoomPageProvider>(context, listen: false).profiles;
-    int count = 0;
+    
     if(rooms.isNotEmpty){
+      print('Render ${renderCount++} times');
       return ListView.builder(
         scrollDirection: Axis.vertical,
         itemCount: rooms.length,
@@ -256,7 +275,7 @@ class _DisplayChatsState extends State<DisplayChats> {
                 onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
                 leading: Avatar(profile: otherUser),
                 title: Text(otherUser.username),
-                subtitle: Text(rooms[index].lastMessage == null ? 'Click here to send a message!' : rooms[index].lastMessage!.content),
+                subtitle: Text(rooms[index].lastMessage == null ? '' : rooms[index].lastMessage!.content),
               )
             ),
           );
