@@ -222,7 +222,6 @@ class _DisplayChatsState extends State<DisplayChats> {
             final bTimeStamp = b.lastMessage != null ? b.lastMessage!.createdAt : b.createdAt;
             return bTimeStamp.compareTo(aTimeStamp);
           });
-          setState(() {});
         });
   }
 
