@@ -96,9 +96,14 @@ class _RoomsPageState extends State<RoomsPage> {
           Provider.of<RoomPageProvider>(context, listen: false).rooms = currentRoomData;
 
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
-              Expanded(flex: 1, child: StartChatBar()),
-              Expanded(flex: 9, child: DisplayChats())
+              SizedBox(height: 80, child: StartChatBar()),
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text('Chats', style: TextStyle(fontSize: 25)),
+              ),
+              Expanded(child: DisplayChats())
             ],
           );
         },
@@ -214,6 +219,7 @@ class _DisplayChatsState extends State<DisplayChats> {
           final index = rooms.indexWhere((room) => room.id == roomId);
           rooms[index] = rooms[index].copyWith(lastMessage: message);
 
+          // This should be moved into its own function. It should be used when rooms are also created. It should also sort and then render
           rooms.sort((a, b) {
             // Sort according to the last message
             // Use the room createdAt when last message is not available
