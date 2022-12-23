@@ -190,7 +190,6 @@ class _DisplayChatsState extends State<DisplayChats> {
       for (final room in rooms) {
         getNewestMessage(roomId: room.id);
        }
-      
       setState(() {});
     }); 
   }
@@ -243,26 +242,33 @@ class _DisplayChatsState extends State<DisplayChats> {
   Widget build(BuildContext context) {
 
     List<Profile>? currentProfileData = Provider.of<RoomPageProvider>(context, listen: false).profiles;
-   
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
-      itemCount: rooms.length,
-      itemBuilder: (BuildContext context, int index) {  
-        Profile? otherUser = getProfileName(rooms[index].otherUserId, currentProfileData!);
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(10,10,10,0),
-          child: Card(
-            child: ListTile(
-              onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
-              leading: Avatar(profile: otherUser),
-              title: Text(otherUser.username),
-              subtitle: Text(rooms[index].lastMessage == null ? 'Click here to send a message!' : rooms[index].lastMessage!.content),
-            )
-          ),
-        );
-      }
-    );
+    int count = 0;
+    if(rooms.isNotEmpty){
+      return ListView.builder(
+        scrollDirection: Axis.vertical,
+        itemCount: rooms.length,
+        itemBuilder: (BuildContext context, int index) {  
+          Profile? otherUser = getProfileName(rooms[index].otherUserId, currentProfileData!);
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(10,10,10,0),
+            child: Card(
+              child: ListTile(
+                onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
+                leading: Avatar(profile: otherUser),
+                title: Text(otherUser.username),
+                subtitle: Text(rooms[index].lastMessage == null ? 'Click here to send a message!' : rooms[index].lastMessage!.content),
+              )
+            ),
+          );
+        }
+      );
+    }
+
+    else{
+      return const Center(child: Text('Click on an avatar above to start a chat :)'));
+    }
+    
      
   }
 }
