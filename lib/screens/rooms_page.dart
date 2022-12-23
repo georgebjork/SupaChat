@@ -173,8 +173,10 @@ class _DisplayChatsState extends State<DisplayChats> {
   // A stream of all chat messages data. This will notify us about new chats to display on the room cards. final Map<String, StreamSubscription<Message?>> messagesStream = {};
 
   int renderCount = 0;
+
   // Room data
-  StreamSubscription<List<Map<String, dynamic>>>? roomsStream;
+  StreamSubscription<List<Room>>? roomsSubscription; 
+  Stream<List<Room>>? roomsStream; 
   List<Room> rooms = [];
 
   //Message data
@@ -197,36 +199,36 @@ class _DisplayChatsState extends State<DisplayChats> {
   }
 
   Future<void> setRoomsListener() async {
-
-    roomsStream = supabase.from('room_participants').stream(primaryKey: ['room_id', 'profile_id']).neq('profile_id', userId).listen((listOfRooms) async {
-      
-      rooms = listOfRooms.map((e) => Room.fromRoomParticipants(e)).toList();
-      for (final room in rooms) {
-        getNewestMessage(roomId: room.id);
-      }
-    }); 
+    // Listen to the stream and map it into a list of rooms
+    roomsStream = supabase.from('room_participants').stream(primaryKey: ['room_id', 'profile_id']).neq('profile_id', userId)
+      .map((listOfRooms) => rooms = listOfRooms.map((e) => Room.fromRoomParticipants(e)).toList());
+    
+    // Now we want to listen to the stream with a subscription. If we hear a change, we want to do something. In this case, set a listener for new messages
+    roomsSubscription = roomsStream?.listen(
+      // Get the newest data
+      (listOfRooms) async {
+        for (final room in rooms) {
+          getNewestMessage(roomId: room.id);
+        }
+      },
+      onError: (err) => context.showErrorSnackBar(message: err.toString()),
+      onDone: () => print('Done!')
+    ); 
   }
 
   void getNewestMessage({required roomId}) {
-    messagesStream['roomId'] = supabase
-        .from('messages')
-        .stream(primaryKey: ['id'])
-        .eq('room_id', roomId)
-        .order('created_at')
-        .limit(1)
-        .map<Message?>(
-          (data) => data.isEmpty
-              ? null
-              : Message.fromMap(
-                  map: data.first,
-                  myUserId: userId,
-                ),
-        )
-        .listen((message) {
+    messagesStream['roomId'] = supabase.from('messages').stream(primaryKey: ['id']).eq('room_id', roomId).order('created_at').limit(1)
+        // Map the stream into Messages
+        .map<Message?>((data) => data.isEmpty? null : Message.fromMap(map: data.first, myUserId: userId))
+        // Listen for changes 
+        .listen((message) {   
           // Set the newest message 
           final index = rooms.indexWhere((room) => room.id == roomId);
-          rooms[index] = rooms[index].copyWith(lastMessage: message);
+          if(index == -1) {
+            return;
+          } 
 
+          rooms[index] = rooms[index].copyWith(lastMessage: message);
           rooms = sortRooms(rooms);
           setState(() {});
         });
@@ -248,9 +250,8 @@ class _DisplayChatsState extends State<DisplayChats> {
     super.initState();
   }
 
-  @override
-  void dispose(){
-    roomsStream?.cancel();
+  @override void dispose() {
+    roomsSubscription?.cancel();
     super.dispose();
   }
 
@@ -260,34 +261,36 @@ class _DisplayChatsState extends State<DisplayChats> {
 
     List<Profile>? currentProfileData = Provider.of<RoomPageProvider>(context, listen: false).profiles;
     
-    if(rooms.isNotEmpty){
-      print('Render ${renderCount++} times');
-      return ListView.builder(
-        scrollDirection: Axis.vertical,
-        itemCount: rooms.length,
-        itemBuilder: (BuildContext context, int index) {  
-          Profile? otherUser = getProfileName(rooms[index].otherUserId, currentProfileData!);
-          return Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(10,10,10,0),
-            child: Card(
-              child: ListTile(
-                onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
-                leading: Avatar(profile: otherUser),
-                title: Text(otherUser.username),
-                subtitle: Text(rooms[index].lastMessage == null ? '' : rooms[index].lastMessage!.content),
-              )
-            ),
+    return StreamBuilder(
+      stream: roomsStream,
+      builder: (context, snapshot) {
+        if(rooms.isNotEmpty){
+          print('ListView rendered ${++renderCount} times');
+          return ListView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: rooms.length,
+            itemBuilder: (BuildContext context, int index) {  
+              Profile? otherUser = getProfileName(rooms[index].otherUserId, currentProfileData!);
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(10,10,10,0),
+                child: Card(
+                  child: ListTile(
+                    onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
+                    leading: Avatar(profile: otherUser),
+                    title: Text(otherUser.username),
+                    subtitle: Text(rooms[index].lastMessage == null ? '' : rooms[index].lastMessage!.content),
+                  )
+                ),
+              );
+            }
           );
         }
-      );
-    }
-
-    else{
-      return const Center(child: Text('Click on an avatar above to start a chat :)'));
-    }
-    
-     
+        else {
+          return const Center(child: Text('Click on an avatar above to start a chat :)'));
+        }
+      },
+    );
   }
 }
 
