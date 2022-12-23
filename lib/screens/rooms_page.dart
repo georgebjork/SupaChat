@@ -32,6 +32,8 @@ class _RoomsPageState extends State<RoomsPage> {
 
   // The Current User Id
   final String userId = supabase.auth.currentUser!.id;
+  // This is the user profile
+  Profile? userProfile;
 
   @override
   void initState() {
@@ -43,6 +45,10 @@ class _RoomsPageState extends State<RoomsPage> {
     // Grab all profiles 
     final List<dynamic> data = await supabase.from('profiles').select();
     currentProfileData = data.map((index) => Profile.fromMap(index)).toList();
+    
+    int index = currentProfileData.indexWhere((element) => element.id == userId);
+    userProfile = currentProfileData[index];
+    setState(() {});
   }
 
   // This will load all of the rooms for user from the database
@@ -55,7 +61,7 @@ class _RoomsPageState extends State<RoomsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const HomeDrawer(),
+      drawer: HomeDrawer(userProfile: userProfile),
       appBar: AppBar(
         iconTheme: Theme.of(context).iconTheme,
         title: const Text('Chat Rooms'), 
@@ -280,8 +286,10 @@ class _DisplayChatsState extends State<DisplayChats> {
 
 
 class HomeDrawer extends StatefulWidget {
+
+  final Profile? userProfile;
   
-  const HomeDrawer({super.key});
+  const HomeDrawer({super.key, required this.userProfile});
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -295,7 +303,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
       
       child: Column(
         children: [
-          DrawerHeader(decoration: BoxDecoration(color: themeData.green), child: null),
+          DrawerHeader(child: (widget.userProfile == null) ? null : Avatar(profile: widget.userProfile, radius: 50, fontSize: 40)),
           Expanded(
             child: ListView(
               shrinkWrap: true,
