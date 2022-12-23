@@ -172,9 +172,8 @@ class _DisplayChatsState extends State<DisplayChats> {
   // A list of all rooms not attached to the stream subscription. This will allow us to change data. List<Room> rooms
   // A stream of all chat messages data. This will notify us about new chats to display on the room cards. final Map<String, StreamSubscription<Message?>> messagesStream = {};
 
-  int timesRendered = 0;
   // Room data
-  late Stream<List<Room>> roomsStream;
+  StreamSubscription<List<Map<String, dynamic>>>? roomsStream;
   List<Room> rooms = [];
 
   //Message data
@@ -184,19 +183,16 @@ class _DisplayChatsState extends State<DisplayChats> {
   final String userId = supabase.auth.currentUser!.id;
 
   void setRoomsListener() {
-   
-    roomsStream = supabase.from('room_participants').stream(primaryKey: ['room_id', 'profile_id']).neq('profile_id', userId)
-    .map((listOfRooms) => listOfRooms.map((room) { 
 
-      // Rooms now has updated data
+    roomsStream = supabase.from('room_participants').stream(primaryKey: ['room_id', 'profile_id']).neq('profile_id', userId).listen((listOfRooms) async {
+      
       rooms = listOfRooms.map((e) => Room.fromRoomParticipants(e)).toList();
-
       for (final room in rooms) {
         getNewestMessage(roomId: room.id);
-      }
-
-      return Room.fromRoomParticipants(room); 
-    }).toList()); 
+       }
+      
+      setState(() {});
+    }); 
   }
 
   void getNewestMessage({required roomId}) {
@@ -247,38 +243,27 @@ class _DisplayChatsState extends State<DisplayChats> {
   Widget build(BuildContext context) {
 
     List<Profile>? currentProfileData = Provider.of<RoomPageProvider>(context, listen: false).profiles;
-    List<Room>? currentRoomsData = Provider.of<RoomPageProvider>(context, listen: false).rooms;
-
-    return StreamBuilder<List<Room>>(
-      stream: roomsStream,
-      builder: (context, snapshot) {
-        if(rooms.isNotEmpty) {
-          //final rooms = snapshot.data!;
-          return ListView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: rooms.length,
-            itemBuilder: (BuildContext context, int index) {  
-              Profile? otherUser = getProfileName(rooms[index].otherUserId, currentProfileData!);
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(10,10,10,0),
-                child: Card(
-                  child: ListTile(
-                    onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
-                    leading: Avatar(profile: otherUser),
-                    title: Text(otherUser.username),
-                    subtitle: Text(rooms[index].lastMessage == null ? 'Click here to send a message!' : rooms[index].lastMessage!.content),
-                  )
-                ),
-              );
-            }
-          );
-        }
-        else {
-          return const Center(child: Center(child: Text('Click on an Avatar above and send them a message :) ')));
-        }
+   
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      itemCount: rooms.length,
+      itemBuilder: (BuildContext context, int index) {  
+        Profile? otherUser = getProfileName(rooms[index].otherUserId, currentProfileData!);
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(10,10,10,0),
+          child: Card(
+            child: ListTile(
+              onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
+              leading: Avatar(profile: otherUser),
+              title: Text(otherUser.username),
+              subtitle: Text(rooms[index].lastMessage == null ? 'Click here to send a message!' : rooms[index].lastMessage!.content),
+            )
+          ),
+        );
       }
     );
+     
   }
 }
 
