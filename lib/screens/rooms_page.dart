@@ -192,9 +192,6 @@ class _DisplayChatsState extends State<DisplayChats> {
 
       return Room.fromRoomParticipants(room); 
     }).toList()); 
-
-
-
   }
 
   void getNewestMessage({required roomId}) {
@@ -246,15 +243,10 @@ class _DisplayChatsState extends State<DisplayChats> {
     List<Profile>? currentProfileData = Provider.of<RoomPageProvider>(context, listen: false).profiles;
     List<Room>? currentRoomsData = Provider.of<RoomPageProvider>(context, listen: false).rooms;
 
-    // If this data is empty, then theres no need to render the stream. Return this.
-    if(currentRoomsData!.isEmpty){
-      return const Center(child: Center(child: Text('Click on an Avatar above and send them a message :) ')));
-    }
-
     return StreamBuilder<List<Room>>(
       stream: roomsStream,
       builder: (context, snapshot) {
-        if(snapshot.hasData) {
+        if(rooms.isNotEmpty) {
           //final rooms = snapshot.data!;
           return ListView.builder(
             scrollDirection: Axis.vertical,
@@ -277,7 +269,7 @@ class _DisplayChatsState extends State<DisplayChats> {
           );
         }
         else {
-          return preloader;
+          return const Center(child: Center(child: Text('Click on an Avatar above and send them a message :) ')));
         }
       }
     );
