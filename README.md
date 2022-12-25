@@ -11,7 +11,3 @@ If you want to try out this app, you will first have to create an account. After
 ## Demo Video 
 
 Here is a demo of the most current build.
-
-
-
-<img src="https://raw.githubusercontent.com/georgebjork/flutter-chatapp/main/Demo/demo1.gif" />
