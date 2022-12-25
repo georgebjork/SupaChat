@@ -13,6 +13,6 @@ If you want to try out this app, you will first have to create an account. After
 Here is a demo of the most current build.
 
 
-[https://github.com/georgebjork/flutter-chatapp/blob/main/Demo/demo1.gif](https://raw.githubusercontent.com/georgebjork/flutter-chatapp/main/Demo/demo1.gif)
+https://raw.githubusercontent.com/georgebjork/flutter-chatapp/main/Demo/demo1.gif
 
 
