@@ -6,6 +6,7 @@ import 'package:chat_app/models/profile.dart';
 import 'package:chat_app/models/providers/theme_provider.dart';
 import 'package:chat_app/models/room.dart';
 import 'package:chat_app/screens/chat_page.dart';
+import 'package:chat_app/screens/profile_page.dart';
 import 'package:chat_app/screens/register_page.dart';
 import 'package:chat_app/utils/constants.dart';
 import 'package:flutter/material.dart';
@@ -327,12 +328,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
       
       child: Column(
         children: [
-          DrawerHeader(child: (widget.userProfile == null) ? null : Avatar(profile: widget.userProfile, radius: 50, fontSize: 40)),
+          DrawerHeader(child: Avatar(profile: widget.userProfile, radius: 50, fontSize: 40)),
           Expanded(
             child: ListView(
               shrinkWrap: true,
               children: [
-                ListTile(leading: const Icon(Icons.account_circle_outlined), title: const Text('Edit Account'), onTap: () => context.showSnackBar(message: 'Not yet implmented!'))
+                ListTile(leading: const Icon(Icons.account_circle_outlined), title: const Text('Edit Account'), onTap: () => Navigator.of(context).push(ProfilePage.route(widget.userProfile!)))
               ],
             ),
           ),
