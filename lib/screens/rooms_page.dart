@@ -37,6 +37,9 @@ class _RoomsPageState extends State<RoomsPage> {
   // This is the user profile
   Profile? userProfile;
 
+  int requestProfilesCount = 0;
+  int requestCurrentRooms = 0;
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +48,7 @@ class _RoomsPageState extends State<RoomsPage> {
   // This will load all of the available profiles to message 
   Future<void> loadProfiles () async {
     // Grab all profiles 
+    print('Request Profiles: ${++requestProfilesCount}');
     final List<dynamic> data = await supabase.from('profiles').select();
     currentProfileData = data.map((index) => Profile.fromMap(index)).toList();
     
@@ -53,12 +57,11 @@ class _RoomsPageState extends State<RoomsPage> {
 
     // Remove user from the profiles since it will not be needed
     currentProfileData.removeAt(index);
-
-    setState(() {});
   }
 
   // This will load all of the rooms for user from the database
   Future<void> loadRooms() async {
+    print('Request CurrentRooms: ${++requestCurrentRooms}');
     // Grab all of the rooms we are a part of, but filter out ourselves. Row Line Security will only allow us to query rooms we are in.
     final List<dynamic> currentRooms = await supabase.from('room_participants').select().neq('profile_id', userId);
     currentRoomData = currentRooms.map((index) => Room.fromRoomParticipants(index)).toList();
@@ -97,31 +100,33 @@ class _RoomsPageState extends State<RoomsPage> {
             return preloader;
           } 
 
-          // Set the provider data
-          Provider.of<RoomPageProvider>(context, listen: false).profiles = currentProfileData;
-          Provider.of<RoomPageProvider>(context, listen: false).rooms = currentRoomData;
+          else{
+            // Set the provider data
+            Provider.of<RoomPageProvider>(context, listen: false).profiles = currentProfileData;
+            Provider.of<RoomPageProvider>(context, listen: false).rooms = currentRoomData;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
 
-              // Display avatars
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text('Avatars', style: TextStyle(fontSize: 25)),
-              ),
-              SizedBox(height: 80, child: StartChatBar()),
-              
-              //Display chats
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text('Chats', style: TextStyle(fontSize: 25)),
-              ),
-              Expanded(child: DisplayChats())
+                // Display avatars
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Avatars', style: TextStyle(fontSize: 25)),
+                ),
+                SizedBox(height: 80, child: StartChatBar()),
+                
+                //Display chats
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Chats', style: TextStyle(fontSize: 25)),
+                ),
+                Expanded(child: DisplayChats())
 
-            ],
-          );
-        },
+              ],
+            );
+          }
+        }
       )
     );
   }
