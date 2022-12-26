@@ -62,7 +62,7 @@ class _ChatPageState extends State<ChatPage> {
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.otherUser.username), iconTheme: Theme.of(context).iconTheme),
+      appBar: AppBar(title: Text(widget.otherUser.getName() ?? widget.otherUser.username, overflow: TextOverflow.ellipsis, maxLines: 1), iconTheme: Theme.of(context).iconTheme),
       body: StreamBuilder<List<Message>>(
         stream: _messagesStream,
         builder: (context, snapshot) {
