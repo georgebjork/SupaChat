@@ -32,6 +32,7 @@ class _RoomsPageState extends State<RoomsPage> {
 
   // The Current User Id
   final String userId = supabase.auth.currentUser!.id;
+  
   // This is the user profile
   Profile? userProfile;
 
@@ -51,6 +52,8 @@ class _RoomsPageState extends State<RoomsPage> {
 
     // Remove user from the profiles since it will not be needed
     currentProfileData.removeAt(index);
+
+    setState(() {});
   }
 
   // This will load all of the rooms for user from the database
