@@ -4,7 +4,8 @@ class Profile {
     required this.username,
     required this.createdAt,
     this.firstName,
-    this.lastName
+    this.lastName,
+    this.avatarURL
   });
 
   // User ID of the profile
@@ -22,13 +23,17 @@ class Profile {
   // Last name of user
   final String? lastName;
 
+  // Avatar URL
+  final String? avatarURL; 
+
 
   Profile.fromMap(Map<String, dynamic> map)
       : id = map['id'],
         username = map['username'],
         createdAt = DateTime.parse(map['created_at']),
         firstName = map['first_name'],
-        lastName = map['last_name'];
+        lastName = map['last_name'],
+        avatarURL = map['avatar_url'];
 
 
   String? getName(){

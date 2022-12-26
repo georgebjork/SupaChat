@@ -40,6 +40,10 @@ class _RoomsPageState extends State<RoomsPage> {
   int requestProfilesCount = 0;
   int requestCurrentRooms = 0;
 
+  // This will ensure these functions dont get called too many times
+  bool hasLoadProfilesCalled = false;
+  bool hasLoadRoomsCalled = false;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +51,11 @@ class _RoomsPageState extends State<RoomsPage> {
 
   // This will load all of the available profiles to message 
   Future<void> loadProfiles () async {
+    if(hasLoadProfilesCalled){
+      return;
+    }
+
+    hasLoadProfilesCalled = true;
     // Grab all profiles 
     print('Request Profiles: ${++requestProfilesCount}');
     final List<dynamic> data = await supabase.from('profiles').select();
@@ -61,10 +70,18 @@ class _RoomsPageState extends State<RoomsPage> {
 
   // This will load all of the rooms for user from the database
   Future<void> loadRooms() async {
+    if(hasLoadRoomsCalled){
+      return;
+    }
+
+    hasLoadRoomsCalled = true;
+
     print('Request CurrentRooms: ${++requestCurrentRooms}');
     // Grab all of the rooms we are a part of, but filter out ourselves. Row Line Security will only allow us to query rooms we are in.
     final List<dynamic> currentRooms = await supabase.from('room_participants').select().neq('profile_id', userId);
     currentRoomData = currentRooms.map((index) => Room.fromRoomParticipants(index)).toList();
+
+    setState(() {});
   } 
 
   @override
@@ -285,6 +302,7 @@ class _DisplayChatsState extends State<DisplayChats> {
       stream: roomsStream,
       builder: (context, snapshot) {
         if(rooms.isNotEmpty){
+          rooms = sortRooms(rooms);
           print('ListView rendered ${++renderCount} times');
           return ListView.builder(
             scrollDirection: Axis.vertical,
