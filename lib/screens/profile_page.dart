@@ -116,7 +116,7 @@ class _ProfilePageState extends State<ProfilePage> {
             
                   // Update 
                   const SizedBox(height: 10),
-                  Center(child: ElevatedButton(onPressed: _isLoading ? null : _update, child: const Text('Update'))),
+                  ElevatedButton(onPressed: _isLoading ? null : _update, child: const Text('Update')),
                 ],
               ),
             ),
