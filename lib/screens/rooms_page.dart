@@ -293,7 +293,8 @@ class _DisplayChatsState extends State<DisplayChats> {
                   child: ListTile(
                     onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id, otherUser)),
                     leading: Avatar(profile: otherUser),
-                    title: Text(otherUser.username),
+                    // If the name is not null, then we will return the full name. Otherwise just user name 
+                    title: Text(otherUser.getName() ?? otherUser.username),
                     subtitle: Text(rooms[index].lastMessage == null ? '' : rooms[index].lastMessage!.content),
                   )
                 ),

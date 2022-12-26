@@ -22,10 +22,19 @@ class Profile {
   // Last name of user
   final String? lastName;
 
+
   Profile.fromMap(Map<String, dynamic> map)
       : id = map['id'],
         username = map['username'],
         createdAt = DateTime.parse(map['created_at']),
         firstName = map['first_name'],
         lastName = map['last_name'];
+
+
+  String? getName(){
+    if(firstName == null || lastName == null){
+      return null;
+    }
+    return '$firstName $lastName';
+  }
 }
