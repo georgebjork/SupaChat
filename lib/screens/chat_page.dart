@@ -9,10 +9,11 @@ import 'package:chat_app/utils/constants.dart';
 
 class ChatPage extends StatefulWidget {
   final String roomId; 
-  const ChatPage({ Key? key, required this.roomId }) : super(key: key);
+  final Profile otherUser;
+  const ChatPage({ Key? key, required this.roomId, required this.otherUser}) : super(key: key);
 
-  static Route<void> route(String id) {
-    return MaterialPageRoute(builder: (context) => ChatPage(roomId: id));
+  static Route<void> route(String id, Profile user) {
+    return MaterialPageRoute(builder: (context) => ChatPage(roomId: id, otherUser: user));
   }
 
   @override
@@ -61,7 +62,7 @@ class _ChatPageState extends State<ChatPage> {
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat')),
+      appBar: AppBar(title: Text(widget.otherUser.username)),
       body: StreamBuilder<List<Message>>(
         stream: _messagesStream,
         builder: (context, snapshot) {

@@ -48,7 +48,9 @@ class _RoomsPageState extends State<RoomsPage> {
     
     int index = currentProfileData.indexWhere((element) => element.id == userId);
     userProfile = currentProfileData[index];
-    setState(() {});
+
+    // Remove user from the profiles since it will not be needed
+    currentProfileData.removeAt(index);
   }
 
   // This will load all of the rooms for user from the database
@@ -98,12 +100,21 @@ class _RoomsPageState extends State<RoomsPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
+
+              // Display avatars
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text('Avatars', style: TextStyle(fontSize: 25)),
+              ),
               SizedBox(height: 80, child: StartChatBar()),
+              
+              //Display chats
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text('Chats', style: TextStyle(fontSize: 25)),
               ),
               Expanded(child: DisplayChats())
+
             ],
           );
         },
@@ -136,11 +147,11 @@ class StartChatBar extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                Avatar(profile: profiles[index], onPressed: () async {
+                  Avatar(profile: profiles[index], onPressed: () async {
                   // Get a room id from function 
                   String roomId = await createRoom(profiles[index].id);
                   // If it exists already, then navigate to it
-                  if(rooms!.map((e) => e.id).contains(roomId)) { Navigator.of(context).push(ChatPage.route(roomId)); }
+                  if(rooms!.map((e) => e.id).contains(roomId)) { Navigator.of(context).push(ChatPage.route(roomId, profiles[index])); }
                 }),
 
                 Text(profiles[index].username,  overflow: TextOverflow.ellipsis, maxLines: 1)
@@ -276,7 +287,7 @@ class _DisplayChatsState extends State<DisplayChats> {
                 padding: const EdgeInsets.fromLTRB(10,10,10,0),
                 child: Card(
                   child: ListTile(
-                    onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id)),
+                    onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id, otherUser)),
                     leading: Avatar(profile: otherUser),
                     title: Text(otherUser.username),
                     subtitle: Text(rooms[index].lastMessage == null ? '' : rooms[index].lastMessage!.content),
