@@ -38,6 +38,8 @@ class MessageBarState extends State<MessageBar> {
                     focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: HexColor("#a6a6a6"))),
                     contentPadding: const EdgeInsets.all(8),
                   ),
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (value) => sendMessage(),
                 ),
               ),
               TextButton(
