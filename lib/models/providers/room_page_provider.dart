@@ -84,4 +84,12 @@ class RoomPageProvider extends ChangeNotifier {
           sortRooms();
         });
   }
+
+  Future<void> deleteRoom(int index) async {
+    print('Removing room id: ${rooms[index].id}');
+
+    rooms.removeWhere((element) => element.id == rooms[index].id);
+    // Remove from db
+    await supabase.rpc('delete_room', params: {'room_id' : rooms[index].id});
+  }
 }

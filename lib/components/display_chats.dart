@@ -66,13 +66,17 @@ class _DisplayChatsState extends State<DisplayChats> {
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(10,10,10,0),
                     child: Card(
-                      child: ListTile(
-                        onTap: () => Navigator.of(context).push(ChatPage.route(provider.rooms[index].id, otherUser)),
-                        leading: Avatar(profile: otherUser),
-                        // If the name is not null, then we will return the full name. Otherwise just user name 
-                        title: Text(otherUser.getName() ?? otherUser.username),
-                        subtitle: Text(provider.rooms[index].lastMessage == null ? '' : provider.rooms[index].lastMessage!.content),
-                        trailing: Text(provider.rooms[index].lastMessage == null ? '' : format(provider.rooms[index].lastMessage!.createdAt, locale: 'en_short')),
+                      child: Dismissible(
+                        key: Key(provider.rooms[index].id),
+                        onDismissed:(direction) async => await provider.deleteRoom(index),
+                        child: ListTile(
+                          onTap: () => Navigator.of(context).push(ChatPage.route(provider.rooms[index].id, otherUser)),
+                          leading: Avatar(profile: otherUser),
+                          // If the name is not null, then we will return the full name. Otherwise just user name 
+                          title: Text(otherUser.getName() ?? otherUser.username),
+                          subtitle: Text(provider.rooms[index].lastMessage == null ? '' : provider.rooms[index].lastMessage!.content),
+                          trailing: Text(provider.rooms[index].lastMessage == null ? '' : format(provider.rooms[index].lastMessage!.createdAt, locale: 'en_short')),
+                        ),
                       )
                     ),
                   );
