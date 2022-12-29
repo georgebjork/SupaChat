@@ -38,8 +38,15 @@ class Avatar extends StatelessWidget {
 
     // If we have all of the data, return the avatar with the image
     return CircleAvatar(
-      backgroundImage: NetworkImage(profile!.avatarURL ?? ''),
       radius: radius,
+      child: ClipOval(
+        child: Image.network(
+          profile!.avatarURL ?? '',
+          errorBuilder: (context, exception, stackTrace) {
+            return Text(profile!.username.substring(0, 2).toUpperCase(), style: TextStyle(fontSize: fontSize));
+          },
+        ),
+      )
     );
   }
   //

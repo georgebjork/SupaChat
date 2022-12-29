@@ -24,11 +24,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _avatarUrlController = TextEditingController();
 
   @override
   void initState() {
-    _firstNameController.text = widget.userProfile.firstName ?? 'null';
-    _lastNameController.text = widget.userProfile.lastName ?? 'null';
+    _firstNameController.text = widget.userProfile.firstName ?? '';
+    _lastNameController.text = widget.userProfile.lastName ?? '';
+    _avatarUrlController.text = widget.userProfile.avatarURL ?? 'No Avatar Set';
     super.initState();
   }
 
@@ -36,6 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _avatarUrlController.dispose();
     super.dispose();
   }
 
@@ -54,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     try {
-      await supabase.from('profiles').update({'first_name' : _firstNameController.text, 'last_name' : _lastNameController.text}).eq('id', widget.userProfile.id);
+      await supabase.from('profiles').update({'first_name' : _firstNameController.text, 'last_name' : _lastNameController.text, 'avatar_url' : _avatarUrlController.text}).eq('id', widget.userProfile.id);
       // ignore: use_build_context_synchronously
       context.showSnackBar(message: 'Data updated!');
     } catch (err) {
@@ -113,7 +116,18 @@ class _ProfilePageState extends State<ProfilePage> {
             
                     validator: (val) => validate(val)
                   ),
+
+                  // URL field
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _avatarUrlController,
+                    decoration: const InputDecoration(
+                      label: Text('URL'),
+                    ),
             
+                    validator: (val) => validate(val)
+                  ),
+
                   // Update 
                   const SizedBox(height: 10),
                   ElevatedButton(onPressed: _isLoading ? null : _update, child: const Text('Update')),
