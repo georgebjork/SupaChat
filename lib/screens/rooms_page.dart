@@ -53,6 +53,7 @@ class _RoomsPageState extends State<RoomsPage> {
       return;
     }
     hasLoadProfilesCalled = true;
+    print('Called Profiles Load');
 
     // Grab all profiles 
     final List<dynamic> data = await supabase.from('profiles').select();
@@ -75,7 +76,7 @@ class _RoomsPageState extends State<RoomsPage> {
       return;
     }
     hasLoadRoomsCalled = true;
-
+    print('Called Rooms Load');
     // Grab all of the rooms we are a part of.
     final List<dynamic> currentRooms = await supabase.from('room_participants').select().neq('profile_id', userId);
     currentRoomData = currentRooms.map((index) => Room.fromRoomParticipants(index)).toList();

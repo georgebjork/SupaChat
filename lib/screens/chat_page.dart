@@ -23,7 +23,6 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
 
   late final Stream<List<Message>> _messagesStream;
-  final Map<String, Profile> _profileCache = {};
 
   @override
   void initState() {
@@ -36,6 +35,7 @@ class _ChatPageState extends State<ChatPage> {
     final userId = supabase.auth.currentUser!.id;
 
     //Grab chats. The stream will allow us to grab this in real time
+    print('Start Message Stream (Chat Page)');
     _messagesStream = supabase
         .from('messages')
         .stream(primaryKey: ['id'])
@@ -44,25 +44,17 @@ class _ChatPageState extends State<ChatPage> {
         .map((maps) => maps.map((map) => Message.fromMap(map: map, myUserId: userId)).toList());
   }
 
-  //Load a cache of profiles
-  Future<void> _loadProfileCache(String profileId) async {
-    if (_profileCache[profileId] != null) {
-      return;
-    }
-    final data =
-        await supabase.from('profiles').select().eq('id', profileId).single();
-    final profile = Profile.fromMap(data);
-    setState(() {
-      _profileCache[profileId] = profile;
-    });
-  }
-
 
 
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.otherUser.getName() ?? widget.otherUser.username, overflow: TextOverflow.ellipsis, maxLines: 1), iconTheme: Theme.of(context).iconTheme),
+      appBar: AppBar(
+        title: Text(widget.otherUser.getName() ?? widget.otherUser.username, overflow: TextOverflow.ellipsis, maxLines: 1), 
+        iconTheme: Theme.of(context).iconTheme
+      ),
+
+      
       body: StreamBuilder<List<Message>>(
         stream: _messagesStream,
         builder: (context, snapshot) {
@@ -80,10 +72,9 @@ class _ChatPageState extends State<ChatPage> {
                           itemCount: messages.length,
                           itemBuilder: (context, index) {
                             final message = messages[index];
-                            _loadProfileCache(message.profileId);
                             return ChatBubble(
                               message: message,
-                              profile: _profileCache[message.profileId],
+                              profile: widget.otherUser,
                             );
                           },
                         ),
