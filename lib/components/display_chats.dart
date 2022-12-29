@@ -47,17 +47,13 @@ class _DisplayChatsState extends State<DisplayChats> {
 
   @override
   Widget build(BuildContext context) {
-
-    final roomsStream = Provider.of<RoomPageProvider>(context, listen: false).roomsStream;
-
-    return StreamBuilder(
-      stream: roomsStream,
-      builder: (context, snapshot) {
-        // If our snapshot has data, we will render
-        if(snapshot.hasData) {
-          return Consumer<RoomPageProvider>(
-            builder: (context, provider, child) {
-              //print('Display Chat Render: ${++renderCount}');
+    
+    return Consumer<RoomPageProvider>(
+      builder: (context, provider, child) {
+        return StreamBuilder(
+          stream: provider.roomsStream,
+          builder: (context, snapshot) {
+            if(snapshot.hasData){
               return ListView.builder(
                 itemCount: provider.rooms.length,
                 itemBuilder: (context, index) {
@@ -78,12 +74,12 @@ class _DisplayChatsState extends State<DisplayChats> {
                   );
                 },
               );
-            },
-          );
-        }
-        else{
-          return const Center(child: Text('Click on an avatar above to start a chat :)'));
-        }
+            }
+            else {
+              return const Center(child: Text('Click on an avatar above to start a chat :)'));
+            }
+          }
+        );
       }
     );
   }
