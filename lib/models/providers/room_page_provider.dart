@@ -53,9 +53,8 @@ class RoomPageProvider extends ChangeNotifier {
       .map((listOfRooms) => rooms = listOfRooms.map((e) => Room.fromRoomParticipants(e)).toList());
     
     // Now we want to listen to the stream with a subscription. If we hear a change, we want to do something. In this case, set a listener for new messages
-    roomsSubscription = roomsStream?.listen(
-      // Get the newest data
-      (listOfRooms) async {
+    roomsSubscription = roomsStream?.listen((listOfRooms) async {
+        // Get the newest data
         print('Room Listener Called!');
         for (final room in rooms) {
           getNewestMessage(roomId: room.id);
@@ -73,13 +72,13 @@ class RoomPageProvider extends ChangeNotifier {
         .map<Message?>((data) => data.isEmpty? null : Message.fromMap(map: data.first, myUserId: userId))
         // Listen for changes 
         .listen((message) {   
-           print('Message Listener Called!');
           // Set the newest message 
           final index = rooms.indexWhere((room) => room.id == roomId);
           if(index == -1) {
             return;
           } 
 
+          print('Message Listener Called');
           rooms[index] = rooms[index].copyWith(lastMessage: message);
           sortRooms();
         });
@@ -88,8 +87,11 @@ class RoomPageProvider extends ChangeNotifier {
   Future<void> deleteRoom(int index) async {
     print('Removing room id: ${rooms[index].id}');
 
-    rooms.removeWhere((element) => element.id == rooms[index].id);
     // Remove from db
     await supabase.rpc('delete_room', params: {'room_id' : rooms[index].id});
+
+    rooms.removeWhere((element) => element.id == rooms[index].id);
+
+    notifyListeners();
   }
 }

@@ -55,7 +55,7 @@ class _DisplayChatsState extends State<DisplayChats> {
       stream: roomsStream,
       builder: (context, snapshot) {
         // If our snapshot has data, we will render
-        if(snapshot.hasData) {
+        if(snapshot.hasData &&  Provider.of<RoomPageProvider>(context, listen: false).rooms.isNotEmpty) {
           return Consumer<RoomPageProvider>(
             builder: (context, provider, child) {
               return ListView.builder(

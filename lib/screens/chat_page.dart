@@ -35,7 +35,7 @@ class _ChatPageState extends State<ChatPage> {
     final userId = supabase.auth.currentUser!.id;
 
     //Grab chats. The stream will allow us to grab this in real time
-    print('Start Message Stream (Chat Page)');
+    print('Start Message Stream (Chat Page): ${widget.otherUser.username}');
     _messagesStream = supabase
         .from('messages')
         .stream(primaryKey: ['id'])
