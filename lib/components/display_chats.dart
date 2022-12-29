@@ -9,6 +9,7 @@ import 'package:chat_app/screens/chat_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart';
 
 import '../models/profile.dart';
 import '../utils/constants.dart';
@@ -71,6 +72,7 @@ class _DisplayChatsState extends State<DisplayChats> {
                         // If the name is not null, then we will return the full name. Otherwise just user name 
                         title: Text(otherUser.getName() ?? otherUser.username),
                         subtitle: Text(provider.rooms[index].lastMessage == null ? '' : provider.rooms[index].lastMessage!.content),
+                        trailing: Text(provider.rooms[index].lastMessage == null ? '' : format(provider.rooms[index].lastMessage!.createdAt, locale: 'en_short')),
                       )
                     ),
                   );
