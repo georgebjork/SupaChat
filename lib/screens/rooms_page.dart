@@ -38,9 +38,6 @@ class _RoomsPageState extends State<RoomsPage> {
   // This is the user profile
   Profile? userProfile;
 
-  int requestProfilesCount = 0;
-  int requestCurrentRooms = 0;
-
   // This will ensure these functions dont get called too many times
   bool hasLoadProfilesCalled = false;
   bool hasLoadRoomsCalled = false;
@@ -57,28 +54,27 @@ class _RoomsPageState extends State<RoomsPage> {
     }
     hasLoadProfilesCalled = true;
 
-    //print('Request Profiles: ${++requestProfilesCount}');
-
     // Grab all profiles 
     final List<dynamic> data = await supabase.from('profiles').select();
     currentProfileData = data.map((index) => Profile.fromMap(index)).toList();
     
     // Get the user profile
     int index = currentProfileData.indexWhere((element) => element.id == userId);
-    userProfile = currentProfileData[index];
 
-    // Remove user from the profiles array since it will not be needed
-    currentProfileData.removeAt(index);
+    // Trigger re render to give the drawer the user info without it being null
+    setState(() {
+      userProfile = currentProfileData[index];
+
+      // Remove user from the profiles array since it will not be needed
+      currentProfileData.removeAt(index);
+    });
   }
-
   // This will load all of the rooms for user from the database
   Future<void> loadRooms() async {
     if(hasLoadRoomsCalled){
       return;
     }
     hasLoadRoomsCalled = true;
-
-    //print('Request CurrentRooms: ${++requestCurrentRooms}');
 
     // Grab all of the rooms we are a part of.
     final List<dynamic> currentRooms = await supabase.from('room_participants').select().neq('profile_id', userId);
