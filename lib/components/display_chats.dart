@@ -68,6 +68,7 @@ class _DisplayChatsState extends State<DisplayChats> {
                     child: Card(
                       child: Dismissible(
                         key: Key(provider.rooms[index].id),
+                        direction: DismissDirection.none,
                         onDismissed:(direction) async => await provider.deleteRoom(index),
                         child: ListTile(
                           onTap: () => Navigator.of(context).push(ChatPage.route(provider.rooms[index].id, otherUser)),

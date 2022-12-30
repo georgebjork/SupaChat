@@ -132,5 +132,8 @@ class ThemeProvider extends ChangeNotifier{
         ),
       ),
     ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: HexColor('#00b530')
+    )
   );
 }

@@ -118,7 +118,7 @@ final appThemeDark = ThemeData.dark().copyWith(
         width: 2,
       ),
     ),
-  ),
+  ), 
 );
 
 /// Set of extension methods to easily display a snackbar

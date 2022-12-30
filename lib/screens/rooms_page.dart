@@ -7,6 +7,7 @@ import 'package:chat_app/models/providers/theme_provider.dart';
 import 'package:chat_app/models/room.dart';
 import 'package:chat_app/screens/profile_page.dart';
 import 'package:chat_app/screens/register_page.dart';
+import 'package:chat_app/screens/search_profiles.dart';
 import 'package:chat_app/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -103,6 +104,13 @@ class _RoomsPageState extends State<RoomsPage> {
         ],
       ),
 
+      // Float action button
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).push(SearchProfiles.route()), 
+        child: const Icon(Icons.add),
+      ),
+
+      // Our body with a future builder
       body: FutureBuilder(
         future: Future.wait([
           loadProfiles(),
