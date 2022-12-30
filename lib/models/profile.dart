@@ -18,13 +18,13 @@ class Profile {
   final DateTime createdAt;
 
   // First name of user
-  final String? firstName;
+  String? firstName;
 
   // Last name of user
-  final String? lastName;
+  String? lastName;
 
   // Avatar URL
-  final String? avatarURL; 
+  String? avatarURL; 
 
 
   Profile.fromMap(Map<String, dynamic> map)
@@ -41,5 +41,11 @@ class Profile {
       return null;
     }
     return '$firstName $lastName';
+  }
+
+  void updateProfile({required firstName, required lastName, required avatarURL}) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.avatarURL = avatarURL;
   }
 }

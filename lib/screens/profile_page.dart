@@ -60,6 +60,11 @@ class _ProfilePageState extends State<ProfilePage> {
       await supabase.from('profiles').update({'first_name' : _firstNameController.text, 'last_name' : _lastNameController.text, 'avatar_url' : _avatarUrlController.text}).eq('id', widget.userProfile.id);
       // ignore: use_build_context_synchronously
       context.showSnackBar(message: 'Data updated!');
+
+      setState(() {
+        // Update profile data
+        widget.userProfile.updateProfile(firstName: _firstNameController.text, lastName: _lastNameController.text, avatarURL: _avatarUrlController.text);
+      }); 
     } catch (err) {
       context.showErrorSnackBar(message: err.toString());
     }
