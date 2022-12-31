@@ -50,7 +50,6 @@ class _ChatPageState extends State<ChatPage> {
   /// This will set all messages that have not been read as read
   void setAllMessagesRead() async {
     final data = await supabase.rpc('read_message', params: {'room_id' : widget.roomId, 'user_id' : userId});
-    print('Message updated: $data');
   }
 
 
