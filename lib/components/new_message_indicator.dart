@@ -4,9 +4,9 @@ import 'dart:html';
 import 'package:chat_app/models/message.dart';
 import 'package:flutter/material.dart';
 
+/// This will return a blue box if the message is unread and does not belong to the user. 
+/// Otherwise the box will be transparent.
 class NewMessageIndicator extends StatelessWidget {
-  /// This will return a blue box if the message is unread and does not belong to the user. 
-  /// Otherwise the box will be transparent.
 
   final Message? message; 
 
