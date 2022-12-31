@@ -1,4 +1,4 @@
-import 'package:chat_app/models/Message.dart';
+import 'package:chat_app/models/message.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -81,6 +81,7 @@ class MessageBarState extends State<MessageBar> {
       content: text,
       createdAt: DateTime.now(),
       isMine: true,
+      isRead: false
     );
     
 

@@ -27,68 +27,18 @@ class RoomsPage extends StatefulWidget {
 
 class _RoomsPageState extends State<RoomsPage> {
 
-  //List of available profiles to message
-  List<Profile> currentProfileData = [];
-
-  // List of rooms you are a part of
-  List<Room> currentRoomData = [];
-
-  // The Current User Id
-  final String userId = supabase.auth.currentUser!.id;
-  
-  // This is the user profile
-  Profile? userProfile;
-
-  // This will ensure these functions dont get called too many times
-  bool hasLoadProfilesCalled = false;
-  bool hasLoadRoomsCalled = false;
-
   @override
   void initState() {
     super.initState();
   }
 
-  // This will load all of the available profiles to message 
-  Future<void> loadProfiles () async {
-    if(hasLoadProfilesCalled){
-      return;
-    }
-    hasLoadProfilesCalled = true;
-    print('Called Profiles Load');
-
-    // Grab all profiles 
-    final List<dynamic> data = await supabase.from('profiles').select();
-    currentProfileData = data.map((index) => Profile.fromMap(index)).toList();
-    
-    // Get the user profile
-    int index = currentProfileData.indexWhere((element) => element.id == userId);
-
-    // Trigger re render to give the drawer the user info without it being null
-    setState(() {
-      userProfile = currentProfileData[index];
-
-      // Remove user from the profiles array since it will not be needed
-      currentProfileData.removeAt(index);
-    });
-  }
-  // This will load all of the rooms for user from the database
-  Future<void> loadRooms() async {
-    if(hasLoadRoomsCalled){
-      return;
-    }
-    hasLoadRoomsCalled = true;
-    print('Called Rooms Load');
-    // Grab all of the rooms we are a part of.
-    final List<dynamic> currentRooms = await supabase.from('room_participants').select().neq('profile_id', userId);
-    currentRoomData = currentRooms.map((index) => Room.fromRoomParticipants(index)).toList();
-
-    //setState(() {});
-  } 
-
   @override
   Widget build(BuildContext context) {
+    // This will give us access to the provider
+    final provider = Provider.of<RoomPageProvider>(context, listen: false);
+
     return Scaffold(
-      drawer: HomeDrawer(userProfile: userProfile),
+      drawer: HomeDrawer(),
       appBar: AppBar(
         iconTheme: Theme.of(context).iconTheme,
         title: const Text('Chat Rooms'), 
@@ -113,9 +63,11 @@ class _RoomsPageState extends State<RoomsPage> {
       // Our body with a future builder
       body: FutureBuilder(
         future: Future.wait([
-          loadProfiles(),
-          loadRooms(),
+          // Run these futures from the provider to get inital data
+          provider.loadProfiles(),
+          provider.setRoomsListener()
         ]),
+
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {  
           if (snapshot.hasError) {
             return Text("Error: ${snapshot.error}");
@@ -126,10 +78,6 @@ class _RoomsPageState extends State<RoomsPage> {
           } 
 
           else{
-            // Set the provider data
-            Provider.of<RoomPageProvider>(context, listen: false).profiles = currentProfileData;
-            Provider.of<RoomPageProvider>(context, listen: false).rooms = currentRoomData;
-
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
@@ -159,10 +107,8 @@ class _RoomsPageState extends State<RoomsPage> {
 
 
 class HomeDrawer extends StatefulWidget {
-
-  final Profile? userProfile;
   
-  const HomeDrawer({super.key, required this.userProfile});
+  const HomeDrawer({super.key});
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -172,46 +118,53 @@ class _HomeDrawerState extends State<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
     final themeData = Provider.of<ThemeProvider>(context, listen: false);
-    return Drawer(
-      
-      child: Column(
-        children: [
-          DrawerHeader(child: Avatar(profile: widget.userProfile, radius: 50, fontSize: 40)),
-          Expanded(
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                ListTile(leading: const Icon(Icons.account_circle_outlined), title: const Text('Edit Account'), onTap: () => Navigator.of(context).push(ProfilePage.route(widget.userProfile!)))
-              ],
-            ),
+
+    
+    return Consumer<RoomPageProvider> (
+       builder: (context, provider, child) {
+        return Drawer(
+          child: Column(
+            children: [
+              DrawerHeader(child: Avatar(profile: provider.userProfile, radius: 50, fontSize: 40)),
+              Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    ListTile(leading: const Icon(Icons.account_circle_outlined), title: const Text('Edit Account'), onTap: () => Navigator.of(context).push(ProfilePage.route(provider.userProfile!)))
+                  ],
+                ),
+              ),
+              Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: Column(
+                  children: [
+                    const Divider(),
+                    ListTile(leading: const Icon(Icons.settings), title: const Text('Settings'), onTap: () => context.showSnackBar(message: 'Not yet implmented!')),
+                    SwitchListTile(
+                      title: const Text('Light or Dark Mode'),
+                      secondary: themeData.isDark ? const Icon(Icons.brightness_2_outlined) : const Icon(Icons.brightness_low_sharp),
+                      value: themeData.isDark, 
+                      activeColor: themeData.green, 
+                      onChanged: (toggled) { 
+                        setState(() {
+                          if(themeData.isDark == true){
+                            themeData.setTheme('light');
+                          }
+                          else {
+                            themeData.setTheme('dark');
+                          }
+                        });
+                      },
+                    )
+                  ],
+                ),
+              )
+            ],
           ),
-          Align(
-            alignment: FractionalOffset.bottomCenter,
-            child: Column(
-              children: [
-                const Divider(),
-                ListTile(leading: const Icon(Icons.settings), title: const Text('Settings'), onTap: () => context.showSnackBar(message: 'Not yet implmented!')),
-                SwitchListTile(
-                  title: const Text('Light or Dark Mode'),
-                  secondary: themeData.isDark ? const Icon(Icons.brightness_2_outlined) : const Icon(Icons.brightness_low_sharp),
-                  value: themeData.isDark, 
-                  activeColor: themeData.green, 
-                  onChanged: (toggled) { 
-                    setState(() {
-                      if(themeData.isDark == true){
-                        themeData.setTheme('light');
-                      }
-                      else {
-                        themeData.setTheme('dark');
-                      }
-                    });
-                  },
-                )
-              ],
-            ),
-          )
-        ],
-      ),
+        );
+       }
     );
+    
+   
   }
 }

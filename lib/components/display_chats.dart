@@ -1,18 +1,14 @@
 
-import 'dart:async';
-
 import 'package:chat_app/components/avatar.dart';
-import 'package:chat_app/models/Message.dart';
+import 'package:chat_app/components/new_message_indicator.dart';
 import 'package:chat_app/models/providers/room_page_provider.dart';
-import 'package:chat_app/models/room.dart';
 import 'package:chat_app/screens/chat_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart';
 
 import '../models/profile.dart';
-import '../utils/constants.dart';
+import '../models/message.dart';
 
 class DisplayChats extends StatefulWidget {
   
@@ -24,13 +20,8 @@ class DisplayChats extends StatefulWidget {
 
 class _DisplayChatsState extends State<DisplayChats> {
 
-  static int renderCount = 0;
-
   @override
   void initState() {
-    
-    // Set the listener from the provider
-    Provider.of<RoomPageProvider>(context, listen: false).setRoomsListener();
     super.initState();
   }
 
@@ -61,22 +52,36 @@ class _DisplayChatsState extends State<DisplayChats> {
               return ListView.builder(
                 itemCount: provider.rooms.length,
                 itemBuilder: (context, index) {
-                  Profile? otherUser = getProfile(provider.rooms[index].otherUserId, provider.profiles);
+                  final room = provider.rooms[index];
+                  Profile? otherUser = getProfile(room.otherUserId, provider.profiles);
                   return Container(
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(10,10,10,0),
                     child: Card(
                       child: Dismissible(
-                        key: Key(provider.rooms[index].id),
+                        key: Key(room.id),
                         direction: DismissDirection.none,
                         onDismissed:(direction) async => await provider.deleteRoom(index),
                         child: ListTile(
-                          onTap: () => Navigator.of(context).push(ChatPage.route(provider.rooms[index].id, otherUser)),
-                          leading: Avatar(profile: otherUser),
+                          onTap: () => Navigator.of(context).push(ChatPage.route(room.id, otherUser)),
+                          
+                          // This row will be used to display a shape to show if there is a new message 
+                          leading: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 10.0),
+                                child: NewMessageIndicator(message: room.lastMessage)),
+                              Avatar(profile: otherUser),
+                            ],
+                          ),
                           // If the name is not null, then we will return the full name. Otherwise just user name 
                           title: Text(otherUser.getName() ?? otherUser.username),
-                          subtitle: Text(provider.rooms[index].lastMessage == null ? '' : provider.rooms[index].lastMessage!.content),
-                          trailing: Text(provider.rooms[index].lastMessage == null ? '' : format(provider.rooms[index].lastMessage!.createdAt, locale: 'en_short')),
+                          subtitle: Text(room.lastMessage == null ? '' : room.lastMessage!.content),
+                          trailing: Padding(
+                            padding: const EdgeInsets.only(right: 10.0),
+                            child: Text(room.lastMessage == null ? '' : format(room.lastMessage!.createdAt, locale: 'en_short')),
+                          ),
                         ),
                       )
                     ),
@@ -93,45 +98,3 @@ class _DisplayChatsState extends State<DisplayChats> {
     );
   }
 }
-
-
-/*
-
-return StreamBuilder(
-      stream: roomsStream,
-      builder: (context, snapshot) {
-        if(rooms.isNotEmpty){
-          rooms = sortRooms(rooms);
-          print('ListView rendered ${++renderCount} times');
-          return ListView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: rooms.length,
-            itemBuilder: (BuildContext context, int index) {  
-              Profile? otherUser = getProfileName(rooms[index].otherUserId, currentProfileData!);
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(10,10,10,0),
-                child: Card(
-                  child: ListTile(
-                    onTap: () => Navigator.of(context).push(ChatPage.route(rooms[index].id, otherUser)),
-                    leading: Avatar(profile: otherUser),
-                    // If the name is not null, then we will return the full name. Otherwise just user name 
-                    title: Text(otherUser.getName() ?? otherUser.username),
-                    subtitle: Text(rooms[index].lastMessage == null ? '' : rooms[index].lastMessage!.content),
-                  )
-                ),
-              );
-            }
-          );
-        }
-        else {
-          return const Center(child: Text('Click on an avatar above to start a chat :)'));
-        }
-      },
-    );
-
-
-
-
-
-*/

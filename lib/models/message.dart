@@ -1,4 +1,5 @@
 class Message {
+  
   Message({
     required this.id,
     required this.roomId,
@@ -6,7 +7,7 @@ class Message {
     required this.content,
     required this.createdAt,
     required this.isMine,
-
+    required this.isRead
   });
 
   /// ID of the message
@@ -27,6 +28,9 @@ class Message {
   /// Whether the message is sent by the user or not.
   final bool isMine;
 
+  /// Has the message been read
+  final bool isRead;
+
    Map<String, dynamic> toMap() {
     return {
       'profile_id': profileId,
@@ -43,5 +47,6 @@ class Message {
         profileId = map['profile_id'],
         content = map['content'],
         createdAt = DateTime.parse(map['created_at']),
-        isMine = myUserId == map['profile_id'];
+        isMine = myUserId == map['profile_id'],
+        isRead = map['is_read'];
 }

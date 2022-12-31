@@ -1,4 +1,4 @@
-import 'package:chat_app/models/Message.dart';
+import 'package:chat_app/models/message.dart';
 
 class Room {
   Room({
