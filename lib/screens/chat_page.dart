@@ -24,15 +24,17 @@ class _ChatPageState extends State<ChatPage> {
 
   late final Stream<List<Message>> _messagesStream;
 
+  //Hold the current user
+  final userId = supabase.auth.currentUser!.id;
+
   @override
   void initState() {
     setMessagesListener(widget.roomId);
+    setAllMessagesRead();
     super.initState();
   }
 
   void setMessagesListener(String roomId){
-    //Hold the current user
-    final userId = supabase.auth.currentUser!.id;
 
     //Grab chats. The stream will allow us to grab this in real time
     print('Start Message Stream (Chat Page): ${widget.otherUser.username}');
@@ -44,6 +46,12 @@ class _ChatPageState extends State<ChatPage> {
         .map((maps) => maps.map((map) => Message.fromMap(map: map, myUserId: userId)).toList());
   }
 
+
+  /// This will set all messages that have not been read as read
+  void setAllMessagesRead() async {
+    final data = await supabase.rpc('read_message', params: {'room_id' : widget.roomId, 'user_id' : userId});
+    print('Message updated: $data');
+  }
 
 
 @override

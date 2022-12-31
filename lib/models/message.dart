@@ -1,4 +1,5 @@
 class Message {
+  
   Message({
     required this.id,
     required this.roomId,

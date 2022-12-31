@@ -1,7 +1,7 @@
 
 import 'dart:async';
 
-import 'package:chat_app/models/Message.dart';
+import 'package:chat_app/models/message.dart';
 import 'package:chat_app/models/profile.dart';
 import 'package:chat_app/models/room.dart';
 import 'package:chat_app/utils/constants.dart';
@@ -84,8 +84,7 @@ class RoomPageProvider extends ChangeNotifier {
           if(index == -1) {
             return;
           } 
-
-          print('Message Listener Called');
+          print('Message Listener Called: ${message!.content}');
           rooms[index] = rooms[index].copyWith(lastMessage: message);
           sortRooms();
         });
