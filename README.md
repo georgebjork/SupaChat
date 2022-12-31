@@ -15,6 +15,5 @@ Here is a demo of the most current build.
 <img src="https://raw.githubusercontent.com/georgebjork/flutter-chatapp/main/Demo/demo2.gif" />
 
 
-### First Demo
+First demo is found here: https://github.com/georgebjork/flutter-chatapp/blob/main/Demo/demo1.gif
 
-<img src="https://raw.githubusercontent.com/georgebjork/flutter-chatapp/main/Demo/demo1.gif" />
