@@ -1,4 +1,4 @@
-# flutter-chatapp
+# SupaChat
 
 Welcome to my Chat app built with flutter and Supabase!
 
